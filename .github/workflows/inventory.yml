@@ -7,7 +7,7 @@ jobs:
     permissions: { contents: write }
     steps:
       - uses: actions/checkout@v4
-      - run: bash tools/fetch_assets.sh > fetch.log 2>&1 || true
+      - run: bash tools/fetch_assets.sh 2>&1 | tee fetch.log || true
       - run: |
           mkdir -p out
           cp fetch.log out/
