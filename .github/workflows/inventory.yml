@@ -1,0 +1,22 @@
+name: inventory
+on: [workflow_dispatch, push]
+jobs:
+  inv:
+    if: contains(github.event.head_commit.message, '[inv]') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash tools/fetch_assets.sh > fetch.log 2>&1 || true
+      - run: |
+          mkdir -p out
+          cp fetch.log out/
+          find assets_mh -type f \( -name '*.mhclo' -o -name '*.mhmat' -o -name '*.mhskin' -o -name '*.thumb' \) | sort > out/files.txt
+          du -sh assets_mh > out/size.txt
+          mkdir -p out/thumbs
+          for f in $(grep -E '\.thumb$' out/files.txt | grep -E 'skins|clothes|hair|eyebrow' ); do n=$(echo $f | tr '/' '_' | sed 's/\.thumb$/.png/'); cp "$f" "out/thumbs/$n"; done
+      - run: |
+          cd out
+          git init -q -b out && git add -A
+          git -c user.name=bot -c user.email=bot@x commit -qm inventory
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" out

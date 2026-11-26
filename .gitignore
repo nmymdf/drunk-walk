@@ -1,0 +1,8 @@
+assets_mh/
+dl/
+*.keystore
+*.jks
+*.b64
+/local.properties
+build/
+.godot/
