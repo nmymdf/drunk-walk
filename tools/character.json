@@ -1,0 +1,24 @@
+{
+  "macro": {"gender": 1.0, "age": 0.72, "muscle": 0.45, "weight": 0.66, "proportions": 0.55,
+            "height": 0.55, "cupsize": 0.5, "firmness": 0.5,
+            "race": {"asian": 0.9, "caucasian": 0.1, "african": 0.0}},
+  "skin": ["middleage asian male !female", "middleage male !female", "asian male !female", "male !female", "default"],
+  "eyes": ["high-poly .mhclo", "eyes"],
+  "eyebrows": ["eyebrow010", "eyebrow001", "mindfront_eyebrows_03", "eyebrow"],
+  "eyelashes": ["eyelashes02", "eyelashes01", "eyelash"],
+  "hair": ["short02", "short04", "short01", "male short", "short"],
+  "suit": ["toigo_male_suit_tie_and_jacket", "male_worksuit", "suit !female"],
+  "shoes": ["shoes06", "shoes02", "shoes01", "shoe"],
+  "pose": {
+    "upperarm01.L": [0, 0, -48], "upperarm01.R": [0, 0, 48],
+    "lowerarm01.L": [0, 0, -8],  "lowerarm01.R": [0, 0, 8]
+  },
+  "samples": 64,
+  "exposure": -0.3,
+  "shots": [
+    {"name": "1_正面", "angle": 15},
+    {"name": "2_側面", "angle": 90},
+    {"name": "3_背影", "angle": 180},
+    {"name": "4_臉部", "angle": 15, "face": true}
+  ]
+}

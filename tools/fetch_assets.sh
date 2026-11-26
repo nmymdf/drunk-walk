@@ -1,13 +1,19 @@
 #!/usr/bin/env bash
-# 下載 MakeHuman 素材包（CC0）到 assets_mh/
-set -e
-BASE=https://static.makehumancommunity.org/assets/assetpacks
+# 下載 MakeHuman CC0 素材包到 assets_mh/（官網很慢，同時下載）
+set -u
 mkdir -p assets_mh dl
-for p in makehuman_system_assets skins02 suits01 shirts01 pants01 shoes01 hair01 eyebrows01 eyelashes01; do
-  page=$(curl -sL --max-time 60 "$BASE/$p.html")
-  url=$(echo "$page" | grep -oE 'href="[^"]+\.zip"' | head -1 | sed 's/href="//;s/"$//')
-  case "$url" in http*) ;; *) url="$BASE/$url";; esac
-  echo "$p -> $url"
-  curl -L --max-time 900 --retry 2 -s -w "%{http_code} %{size_download} %{speed_download}\n" "$url" -o "dl/$p.zip" || echo FAIL
-  unzip -oq "dl/$p.zip" -d assets_mh
+PACKS="makehuman_system_assets skins02 suits01 shoes01 hair01 eyebrows01 eyelashes01"
+for p in $PACKS; do
+  (
+    for host in files2 files; do
+      url="https://$host.makehumancommunity.org/asset_packs/$p/${p}_cc0.zip"
+      [ "$p" = makehuman_system_assets ] && url=$(curl -sL --max-time 60 https://static.makehumancommunity.org/assets/assetpacks/$p.html | grep -oE "https://$host[^\"]+\.zip" | head -1)
+      echo "$p <- $url"
+      curl -L --max-time 5400 --retry 2 -s -w "$p %{http_code} %{size_download} %{speed_download}\n" "$url" -o "dl/$p.zip" && unzip -tq "dl/$p.zip" >/dev/null && break
+      echo "$p failed on $host"
+    done
+  ) &
 done
+wait
+for p in $PACKS; do unzip -oq "dl/$p.zip" -d assets_mh || echo "UNZIP FAIL $p"; done
+du -sh assets_mh

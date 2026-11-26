@@ -1,0 +1,33 @@
+name: character
+on:
+  workflow_dispatch:
+  push:
+    paths: ['tools/make_character.py', 'tools/character.json', '.github/workflows/character.yml']
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - id: cache
+        uses: actions/cache@v4
+        with:
+          path: assets_mh
+          key: mh-assets-v1
+      - if: steps.cache.outputs.cache-hit != 'true'
+        run: bash tools/fetch_assets.sh
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13' }
+      - run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libxkbcommon0 libsm6 libgl1 libegl1 >/dev/null
+          pip install -q bpy==5.3.0
+          git clone -q --depth 1 https://github.com/makehumancommunity/mpfb2 /tmp/mpfb2
+          D=~/.config/blender/5.3/extensions/user_default; mkdir -p $D; cp -r /tmp/mpfb2/src/mpfb $D/mpfb
+      - run: cd /tmp && python -I $GITHUB_WORKSPACE/tools/make_character.py -- $GITHUB_WORKSPACE/assets_mh $GITHUB_WORKSPACE/out
+      - if: always()
+        run: |
+          cd out && rm -f *.blend*
+          git init -q -b render && git add -A
+          git -c user.name=bot -c user.email=bot@x commit -qm "render ${{ github.sha }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" render
