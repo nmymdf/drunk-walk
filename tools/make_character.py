@@ -58,6 +58,49 @@ for kind, key in (("Eyes", "eyes"), ("Eyebrows", "eyebrows"), ("Eyelashes", "eye
     except Exception as e:
         L("asset fail", key, e)
 
+# 眼睛換成指定顏色、頭髮調暗
+def objs_with(word):
+    return [o for o in bpy.data.objects if o.type == 'MESH' and word in o.name.lower()]
+eye_tex = [f for f in glob.glob(os.path.join(ASSETS, "eyes", "materials", "*.png"))
+           if os.path.basename(f).lower().startswith(CFG.get("eye_color", "brown") + ".")
+           or os.path.basename(f).lower() == CFG.get("eye_color", "brown") + "_eye.png"]
+L("EYE TEX", eye_tex)
+for o in objs_with("eye"):
+    if "brow" in o.name.lower() or "lash" in o.name.lower():
+        continue
+    for m in o.data.materials:
+        if not m or not m.node_tree: continue
+        for n in m.node_tree.nodes:
+            if n.type == 'TEX_IMAGE' and n.image and eye_tex and "eyes" in n.image.filepath.lower().replace("\\", "/"):
+                L("eye swap", n.image.filepath)
+                n.image = bpy.data.images.load(eye_tex[0])
+def darken(o, value):
+    for m in o.data.materials:
+        if not m or not m.node_tree: continue
+        nt = m.node_tree
+        for n in list(nt.nodes):
+            if n.type == 'BSDF_PRINCIPLED':
+                inp = n.inputs["Base Color"]
+                if inp.links:
+                    src = inp.links[0].from_socket
+                    hsv = nt.nodes.new("ShaderNodeHueSaturation")
+                    hsv.inputs["Saturation"].default_value = 0.55
+                    hsv.inputs["Value"].default_value = value
+                    nt.links.new(src, hsv.inputs["Color"]); nt.links.new(hsv.outputs["Color"], inp)
+                else:
+                    c = inp.default_value; inp.default_value = (c[0]*value, c[1]*value, c[2]*value, 1)
+for o in bpy.data.objects:
+    if o.type == 'MESH' and any(k in o.name.lower() for k in ("short", "hair")):
+        L("darken hair", o.name); darken(o, CFG.get("hair_darken", 0.35))
+
+# 縮圖（挑素材用）
+import shutil
+os.makedirs(os.path.join(OUT, "thumbs"), exist_ok=True)
+for pat in ("clothes/shoes0*/*.thumb", "hair/short0*/*.thumb", "hair/cortu_short_messy_hair/*.thumb", "hair/culturalibre_hair_0*/*.thumb"):
+    for f in glob.glob(os.path.join(ASSETS, pat)):
+        shutil.copy(f, os.path.join(OUT, "thumbs", os.path.basename(f).replace(".thumb", ".png")))
+L("OBJECTS", [o.name for o in bpy.data.objects])
+
 # 姿勢：手放下、站姿；--drunk 時加上醉態
 pb = rig.pose.bones
 def rot(n, x=0, y=0, z=0):
