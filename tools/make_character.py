@@ -65,13 +65,11 @@ eye_tex = [f for f in glob.glob(os.path.join(ASSETS, "eyes", "materials", "*.png
            if os.path.basename(f).lower().startswith(CFG.get("eye_color", "brown") + ".")
            or os.path.basename(f).lower() == CFG.get("eye_color", "brown") + "_eye.png"]
 L("EYE TEX", eye_tex)
-for o in objs_with("eye"):
-    if "brow" in o.name.lower() or "lash" in o.name.lower():
-        continue
+for o in [o for o in bpy.data.objects if o.type == 'MESH' and ("high-poly" in o.name or "low-poly" in o.name or o.name.lower().endswith("eyes"))]:
     for m in o.data.materials:
         if not m or not m.node_tree: continue
         for n in m.node_tree.nodes:
-            if n.type == 'TEX_IMAGE' and n.image and eye_tex and "eyes" in n.image.filepath.lower().replace("\\", "/"):
+            if n.type == 'TEX_IMAGE' and n.image and eye_tex and "normal" not in n.image.name.lower():
                 L("eye swap", n.image.filepath)
                 n.image = bpy.data.images.load(eye_tex[0])
 def darken(o, value):
@@ -163,6 +161,15 @@ for s in CFG["shots"]:
         shot(s["name"], s["angle"], 1.25, hz - 0.12, 85)
     else:
         shot(s["name"], s["angle"], 5.2, hz * 0.5, 60)
+
+for v in CFG.get("face_variants", []):
+    f = find([v], ".mhmat")
+    if not f: continue
+    try:
+        HS.set_character_skin(f, h, skin_type="ENHANCED_SSS")
+        shot("5_臉_" + v, 15, 1.25, hz - 0.12, 85)
+    except Exception as e:
+        L("variant fail", v, e)
 
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, "drunk_man.blend"))
 L("DONE")

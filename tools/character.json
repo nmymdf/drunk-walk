@@ -2,8 +2,8 @@
   "macro": {
     "gender": 1.0,
     "age": 0.8,
-    "muscle": 0.45,
-    "weight": 0.66,
+    "muscle": 0.5,
+    "weight": 0.72,
     "proportions": 0.55,
     "height": 0.55,
     "cupsize": 0.5,
@@ -46,7 +46,7 @@
     "suit !female"
   ],
   "shoes": [
-    "shoes02",
+    "shoes04",
     "shoe"
   ],
   "pose": {
@@ -83,5 +83,11 @@
     }
   ],
   "hair_darken": 0.35,
-  "eye_color": "brown"
+  "eye_color": "brown",
+  "face_variants": [
+    "middleage_asian_male",
+    "old_asian_male",
+    "onlytheghosts_old_eurasian_male",
+    "mindfront_aksel_skin"
+  ]
 }
