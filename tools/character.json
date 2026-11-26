@@ -15,6 +15,7 @@
     }
   },
   "skin": [
+    "onlytheghosts_old_eurasian_male",
     "middleage asian male !female",
     "middleage male !female",
     "asian male !female",
@@ -80,14 +81,60 @@
       "name": "4_臉部",
       "angle": 15,
       "face": true
+    },
+    {
+      "name": "6_醉態",
+      "angle": 25,
+      "drunk": true
     }
   ],
   "hair_darken": 0.35,
   "eye_color": "brown",
-  "face_variants": [
-    "middleage_asian_male",
-    "old_asian_male",
-    "onlytheghosts_old_eurasian_male",
-    "mindfront_aksel_skin"
-  ]
+  "drunk_pose": {
+    "spine03": [
+      6,
+      0,
+      8
+    ],
+    "spine02": [
+      4,
+      0,
+      6
+    ],
+    "neck01": [
+      12,
+      0,
+      -6
+    ],
+    "head": [
+      10,
+      10,
+      12
+    ],
+    "upperarm01.L": [
+      -25,
+      -20,
+      -10
+    ],
+    "upperarm01.R": [
+      -10,
+      20,
+      40
+    ],
+    "lowerarm01.R": [
+      -30,
+      0,
+      0
+    ],
+    "upperleg01.L": [
+      -12,
+      0,
+      6
+    ],
+    "lowerleg01.L": [
+      20,
+      0,
+      0
+    ]
+  }
 }

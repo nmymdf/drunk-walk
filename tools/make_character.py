@@ -61,17 +61,15 @@ for kind, key in (("Eyes", "eyes"), ("Eyebrows", "eyebrows"), ("Eyelashes", "eye
 # 眼睛換成指定顏色、頭髮調暗
 def objs_with(word):
     return [o for o in bpy.data.objects if o.type == 'MESH' and word in o.name.lower()]
-eye_tex = [f for f in glob.glob(os.path.join(ASSETS, "eyes", "materials", "*.png"))
-           if os.path.basename(f).lower().startswith(CFG.get("eye_color", "brown") + ".")
-           or os.path.basename(f).lower() == CFG.get("eye_color", "brown") + "_eye.png"]
-L("EYE TEX", eye_tex)
-for o in [o for o in bpy.data.objects if o.type == 'MESH' and ("high-poly" in o.name or "low-poly" in o.name or o.name.lower().endswith("eyes"))]:
+# 眼睛：程序材質，改成深棕色、眼白微紅（喝醉）
+for o in [o for o in bpy.data.objects if o.type == 'MESH' and ("high-poly" in o.name or "low-poly" in o.name)]:
     for m in o.data.materials:
-        if not m or not m.node_tree: continue
         for n in m.node_tree.nodes:
-            if n.type == 'TEX_IMAGE' and n.image and eye_tex and "normal" not in n.image.name.lower():
-                L("eye swap", n.image.filepath)
-                n.image = bpy.data.images.load(eye_tex[0])
+            if n.type == 'GROUP':
+                for k, v in (("IrisMajorColor", (0.10, 0.05, 0.025, 1)), ("IrisMinorColor", (0.04, 0.02, 0.01, 1)),
+                             ("IrisSection4Color", (0.015, 0.008, 0.004, 1)), ("EyeWhiteColor", (1.0, 0.86, 0.83, 1))):
+                    if k in n.inputs: n.inputs[k].default_value = v
+                L("eye color set", o.name)
 def darken(o, value):
     for m in o.data.materials:
         if not m or not m.node_tree: continue
@@ -157,7 +155,12 @@ def shot(name, ang, dist, tz, lens):
     L("SHOT", name)
 
 for s in CFG["shots"]:
-    if s.get("face"):
+    if s.get("drunk"):
+        for n, v in CFG["drunk_pose"].items():
+            rot(n, *v)
+        bpy.context.view_layer.update()
+        shot(s["name"], s["angle"], 5.2, hz * 0.5, 60)
+    elif s.get("face"):
         shot(s["name"], s["angle"], 1.25, hz - 0.12, 85)
     else:
         shot(s["name"], s["angle"], 5.2, hz * 0.5, 60)
