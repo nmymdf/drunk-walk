@@ -47,7 +47,8 @@ except Exception as e:
     L("skin fail", e)
 
 for kind, key in (("Eyes", "eyes"), ("Eyebrows", "eyebrows"), ("Eyelashes", "eyelashes"),
-                  ("Hair", "hair"), ("Clothes", "suit"), ("Clothes", "shoes")):
+                  ("Hair", "hair"), ("Clothes", "suit"), ("Clothes", "pants"), ("Clothes", "shoes"), ("Clothes", "hat")):
+    if key not in CFG: continue
     f = find(CFG[key], ".mhclo")
     L("PICK", key, f)
     if not f:
@@ -85,14 +86,49 @@ def darken(o, value):
                     nt.links.new(src, hsv.inputs["Color"]); nt.links.new(hsv.outputs["Color"], inp)
                 else:
                     c = inp.default_value; inp.default_value = (c[0]*value, c[1]*value, c[2]*value, 1)
-for o in bpy.data.objects:
-    if o.type == 'MESH' and any(k in o.name.lower() for k in ("short", "hair")):
-        L("darken hair", o.name); darken(o, CFG.get("hair_darken", 0.35))
+if not CFG.get("hair_color"):
+    for o in bpy.data.objects:
+        if o.type == 'MESH' and any(k in o.name.lower() for k in ("short", "hair")):
+            L("darken hair", o.name); darken(o, CFG.get("hair_darken", 0.35))
+
+# 表情
+try:
+    FS = importlib.import_module(M + "faceservice").FaceService
+    FS.set_expression(h, CFG.get("expression", {}))
+    L("expression keys", [k.name for k in h.data.shape_keys.key_blocks if k.name.startswith("!ex")])
+except Exception as e:
+    L("expression fail", e)
+
+# 頭髮、眉毛改成指定顏色（白髮）
+def recolor(o, rgb):
+    for m in o.data.materials:
+        if not m or not m.node_tree: continue
+        nt = m.node_tree
+        for n in list(nt.nodes):
+            if n.type == 'BSDF_PRINCIPLED':
+                inp = n.inputs["Base Color"]
+                if inp.links:
+                    src = inp.links[0].from_socket
+                    bw = nt.nodes.new("ShaderNodeRGBToBW"); mul = nt.nodes.new("ShaderNodeMix")
+                    mul.data_type = 'RGBA'; mul.blend_type = 'MULTIPLY'; mul.inputs[0].default_value = 1.0
+                    ramp = nt.nodes.new("ShaderNodeMapRange")
+                    nt.links.new(src, bw.inputs[0])
+                    nt.links.new(bw.outputs[0], ramp.inputs[0]); ramp.inputs[3].default_value = 0.55; ramp.inputs[4].default_value = 1.1
+                    comb = nt.nodes.new("ShaderNodeCombineColor")
+                    for ch in range(3): nt.links.new(ramp.outputs[0], comb.inputs[ch])
+                    nt.links.new(comb.outputs[0], mul.inputs[6]); mul.inputs[7].default_value = (*rgb, 1)
+                    nt.links.new(mul.outputs[2], inp)
+                else:
+                    inp.default_value = (*rgb, 1)
+if CFG.get("hair_color"):
+    for o in bpy.data.objects:
+        if o.type == 'MESH' and any(k in o.name.lower() for k in ("short", "hair", "eyebrow")):
+            L("recolor", o.name); recolor(o, CFG["hair_color"])
 
 # 縮圖（挑素材用）
 import shutil
 os.makedirs(os.path.join(OUT, "thumbs"), exist_ok=True)
-for pat in ("clothes/shoes0*/*.thumb", "hair/short0*/*.thumb", "hair/cortu_short_messy_hair/*.thumb", "hair/culturalibre_hair_0*/*.thumb"):
+for pat in ("clothes/shoes0*/*.thumb", "hair/short0*/*.thumb", "hair/cortu_short_messy_hair/*.thumb", "hair/culturalibre_hair_0*/*.thumb", "clothes/*hat*/*.thumb", "clothes/*cap*/*.thumb", "clothes/*sweater*/*.thumb", "clothes/*polo*/*.thumb", "clothes/*pants*/*.thumb"):
     for f in glob.glob(os.path.join(ASSETS, pat)):
         shutil.copy(f, os.path.join(OUT, "thumbs", os.path.basename(f).replace(".thumb", ".png")))
 L("OBJECTS", [o.name for o in bpy.data.objects])

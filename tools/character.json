@@ -1,11 +1,11 @@
 {
   "macro": {
     "gender": 1.0,
-    "age": 0.8,
-    "muscle": 0.5,
-    "weight": 0.72,
-    "proportions": 0.55,
-    "height": 0.55,
+    "age": 0.95,
+    "muscle": 0.3,
+    "weight": 0.6,
+    "proportions": 0.4,
+    "height": 0.4,
     "cupsize": 0.5,
     "firmness": 0.5,
     "race": {
@@ -16,20 +16,14 @@
   },
   "skin": [
     "onlytheghosts_old_eurasian_male",
-    "middleage asian male !female",
-    "middleage male !female",
-    "asian male !female",
-    "male !female",
-    "default"
+    "old_asian_male"
   ],
   "eyes": [
     "high-poly .mhclo",
     "eyes"
   ],
   "eyebrows": [
-    "eyebrow010",
     "eyebrow001",
-    "mindfront_eyebrows_03",
     "eyebrow"
   ],
   "eyelashes": [
@@ -38,17 +32,14 @@
     "eyelash"
   ],
   "hair": [
-    "short04",
     "short02"
   ],
   "suit": [
-    "toigo_male_suit_tie_and_jacket",
-    "male_worksuit",
-    "suit !female"
+    "toigo_fisherman_sweater"
   ],
   "shoes": [
-    "shoes04",
-    "shoe"
+    "toigo_mj_cloth_shoes",
+    "shoes01"
   ],
   "pose": {
     "upperarm01.L": [
@@ -136,5 +127,29 @@
       0,
       0
     ]
+  },
+  "hair_color": [
+    0.78,
+    0.78,
+    0.76
+  ],
+  "pants": [
+    "toigo_wool_pants"
+  ],
+  "hat": [
+    "flat cap",
+    "newsboy",
+    "cap !female"
+  ],
+  "expression": {
+    "mouthSmileLeft": 0.75,
+    "mouthSmileRight": 0.75,
+    "cheekSquintLeft": 0.5,
+    "cheekSquintRight": 0.5,
+    "eyeSquintLeft": 0.45,
+    "eyeSquintRight": 0.45,
+    "eyeBlinkLeft": 0.3,
+    "eyeBlinkRight": 0.3,
+    "browInnerUp": 0.25
   }
 }

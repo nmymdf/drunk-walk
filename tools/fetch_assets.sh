@@ -4,7 +4,7 @@
 set -u
 command -v aria2c >/dev/null || sudo apt-get install -y -qq aria2 >/dev/null
 mkdir -p assets_mh dl
-PACKS="makehuman_system_assets skins02 suits01 shoes01 hair01 eyebrows01 eyelashes01"
+PACKS="makehuman_system_assets skins02 suits01 shoes01 hair01 eyebrows01 eyelashes01 shirts01 pants01 hats01 glasses01 faceunits01"
 for p in $PACKS; do
   (
     for host in files2 files; do
