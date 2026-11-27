@@ -1,0 +1,26 @@
+name: apk
+on:
+  workflow_dispatch:
+  push:
+    paths: ['android/**', 'web/**', '.github/workflows/apk.yml']
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: '8.10.2' }
+      - run: gradle -p android :app:assembleRelease --no-daemon
+      # 正式簽章不在雲端做：把未簽章 APK 和簽章工具放到 build 分支，取回後用自己保管的金鑰簽
+      - run: |
+          BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
+          mkdir -p out/tools
+          cp android/app/build/outputs/apk/release/*.apk out/app-release-unsigned.apk
+          cp $BT/lib/apksigner.jar $BT/zipalign out/tools/ ; cp -r $BT/lib64 out/tools/ 2>/dev/null || true
+          echo "${{ github.sha }}" > out/commit.txt
+          cd out && git init -q -b build && git add -A
+          git -c user.name=bot -c user.email=bot@x commit -qm "build ${{ github.sha }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" build
